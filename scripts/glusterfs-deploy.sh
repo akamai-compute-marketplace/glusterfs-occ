@@ -79,7 +79,7 @@ function rename_provisioner {
 function setup {
   # install dependencies
   apt-get update && apt-get upgrade -y
-  apt-get install -y jq git python3 python3-pip python3-dev build-essential firewalld
+  apt-get install -y jq git python3 python3-pip python3-dev build-essential
   # add private IP address
   rename_provisioner
   configure_privateip  

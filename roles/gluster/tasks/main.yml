@@ -1,23 +1,18 @@
 ---
 # roles/gluster/tasks/main.yml
 
-# good
 - name: configure hostname
   import_tasks: hostname.yml
 
-# good
-- name: install firewall
-  import_tasks: firewall.yml
+#- name: install firewall
+#  import_tasks: firewall.yml
 
-# good
 - name: install gluster
   import_tasks: install.yml
 
-# good
 - name: configure SSL on Gluster
   import_tasks: ssl.yml
   when: enable_tls == 'yes'
 
-# good
 - name: configure Gluster service
   import_tasks: configure.yml

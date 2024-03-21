@@ -8,7 +8,7 @@ fi
 function cleanup {
   if [ "$?" != "0" ]; then
     echo "PLAYBOOK FAILED. See /var/log/stackscript.log for details."
-    #rm ${HOME}/.ssh/id_ansible_ed25519{,.pub}
+    rm ${HOME}/.ssh/id_ansible_ed25519{,.pub}
     #destroy
     exit 1
   fi
@@ -108,44 +108,6 @@ function ansible:deploy {
   ansible-playbook -vvv -i hosts site.yml --extra-vars "root_password=${ROOT_PASS} add_keys_prompt=${ADD_SSH_KEYS}"
 }
 
-# testing. UPDATE ME
-function test:build {
-  # write vars file
-  sed 's/  //g' <<EOF > ${VARS_PATH}
-  # linode vars
-  ssh_keys: ssh-rsa AAAA_valid_public_ssh_key_123456785== user@their-computer
-  # Deployment vars
-  instance_prefix: redis
-  type: g6-standard-2
-  region: us-southeast
-  image: linode/debian11
-  linode_tags: POC
-  # sudo user
-  sudo_username: admin
-  redis_version: ${REDIS_VERSION} #do not update
-  cluster_size: 3
-  # ssl/tls
-  country_name: US
-  state_or_province_name: Pennsylvania
-  locality_name: Philadelphia
-  organization_name: Linode
-  email_address: test@linode.com
-  ca_common_name: Redis CA
-  common_name: linode.com
-  # paths
-  redis_cacert: '/etc/redis/tls/ca.crt'
-  redis_cekey: '/etc/redis/tls/ca.key'
-  redis_cert: '/etc/redis/tls/redis.crt'
-  redis_key: '/etc/redis/tls/redis.key'
-  redis_dh: '/etc/redis/tls/redis.dh'  
-EOF
-  cat "./group_vars/redis-sentinel/vars"
-  mkdir -p ${HOME}/.ssh
-  echo ${ACCOUNT_SSH_KEYS} >> ${HOME}/.ssh/authorized_keys
-  secrets
-  ssh_key
-}
-
 function test:deploy {
   export DISTRO="${1}"
   export DATE="$(date '+%Y-%m-%d-%H%M%S')"
@@ -158,6 +120,5 @@ function test:deploy {
 case $1 in
     ansible:build) "$@"; exit;;
     ansible:deploy) "$@"; exit;;
-    test:build) "$@"; exit;;
     test:deploy) "$@"; exit;;
 esac
