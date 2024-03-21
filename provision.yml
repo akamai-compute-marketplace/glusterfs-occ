@@ -45,7 +45,7 @@
   - name: get info about the instances
     linode.cloud.instance_info:
       api_token: '{{ token }}'
-      label: '{{ instance_prefix }}{{ item }}'
+      label: '{{ instance_prefix }}{{ item }}-{{ uuid }}'
     register: info
     with_sequence: count='{{ cluster_size }}'
 
