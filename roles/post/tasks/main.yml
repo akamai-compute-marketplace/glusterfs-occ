@@ -1,0 +1,39 @@
+---
+# roles/post/tasks/main.yml
+
+- name: set root password on remote nodes
+  lineinfile:
+    path: /etc/shadow
+    regexp: '^root.+'
+    line: '{{ root_password }}'
+
+- name: set ssh facts
+  set_fact:
+    add_keys_prompt: '{{ add_keys_prompt }}'
+
+- name: add account ssh keys 
+  copy:
+    #src: /root/.ssh/authorized_keys
+    #src: '{{ local_home }}/root/.ssh/authorized_keys'
+    src: '{{ local_home }}/.ssh/authorized_keys'
+    dest:  /root/.ssh/authorized_keys
+    owner: root
+    group: root
+    mode: '0600'
+  when: add_keys_prompt == 'yes'
+  
+- name: remove ansible from authorized_keys
+  lineinfile:
+    dest: /root/.ssh/authorized_keys
+    state: absent
+    regexp: '^.+ansible$'
+
+- name: remove ansible ssh keys
+  file:
+    path: '{{ item }}'
+    state: absent
+  run_once: true
+  delegate_to: localhost
+  loop:
+    - '{{ ansible_env.HOME }}/.ssh/id_ansible_ed25519'
+    - '{{ ansible_env.HOME }}/.ssh/id_ansible_ed25519.pub'

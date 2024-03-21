@@ -1,0 +1,19 @@
+- name: install firewalld
+  apt:
+    name: firewalld
+    state: latest
+
+- name: update firewalld.conf
+  lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^IndividualCalls=no'
+    line: IndividualCalls=yes
+  notify: restart firewalld
+
+# can use posix.firewalld to make this more modular/dynamic for adding client IPs
+
+#- name: configure firewall
+#  template:
+#    src: gluster-firewalld-internal.j2
+#    dest: /etc/firewalld/zones/internal.xml 
+#  notify: restart firewalld
