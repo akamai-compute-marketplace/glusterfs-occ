@@ -9,4 +9,5 @@ ansible-lint==6.1.0
 molecule==3.6.1
 molecule-vagrant==1.0.0
 python-vagrant==1.0.0
-ansible-specdoc==0.0.12
+ansible-specdoc==0.0.14
+pyyaml==6.0.1
