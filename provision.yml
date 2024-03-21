@@ -22,7 +22,6 @@
       private_ip: true
       #stackscript_id: null
       #ua_prefix: 'marketplace-glusterfs-occ'          
-      group: '{{ group }}'
       tags: '{{ linode_tags }}'
       state: present
     with_sequence: count='{{ count }}'
