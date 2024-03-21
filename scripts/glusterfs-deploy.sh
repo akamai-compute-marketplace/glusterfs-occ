@@ -72,7 +72,7 @@ function rename_provisioner {
   curl -s -H "Content-Type: application/json" \
       -H "Authorization: Bearer ${TOKEN_PASSWORD}" \
       -X PUT -d "{
-        \"label\": \"${INSTANCE_PREFIX}1\"
+        \"label\": \"${INSTANCE_PREFIX}1-${UUID}\"
       }" \
       https://api.linode.com/v4/linode/instances/${LINODE_ID}
 }
