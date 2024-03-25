@@ -2,7 +2,7 @@
 # set facts for reference
 
 - name: setting facts
-  set_facts:
+  set_fact:
     gluster1: "{{ gluster_data.server[0].instance.hostname }}"
     gluster2: "{{ gluster_data.server[1].instance.hostname }}"
     gluster3: "{{ gluster_data.server[2].instance.hostname }}"
