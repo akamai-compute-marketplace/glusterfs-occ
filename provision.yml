@@ -113,9 +113,9 @@
             {%- for ip in client_ips %}
             - client{{ count.value | int + 1 }}:
               instance:
-                hostname: client{{ count | int + 1 }}
+                hostname: client{{ count.value | int + 1 }}
                 ip_pub1: {{ ip }}
-            {%- set count.value = count.value | int + 1 %}
+            {%- set count.value = count.value + 1 %}
             {%- endfor %}
     #loop: "{{ info.results }}"
 

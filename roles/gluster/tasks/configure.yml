@@ -43,7 +43,7 @@
       - '{{ gluster_data.server[1].instance.hostname }}'
       - '{{ gluster_data.server[2].instance.hostname }}'
   run_once: true
-  delegate_to: "{{groups['gluster_servers'][0]}}"  
+  delegate_to: "localhost"  
 
 # how to breakdown ...
 # remove
@@ -116,7 +116,7 @@
         performance.md-cache-timeout: '60',
         performance.cache-refresh-timeout: '60',
         auth.ssl-allow: "{{ gluster1 }},{{ gluster2 }},{{ gluster3 }},{% set client_list = [] %}\
-          {%- for client in gluster_data1.client %}\
+          {%- for client in gluster_data.client %}\
           {% set _ = client_list.append(client.instance.hostname ~ \"\" ) %}\
           {%- endfor %}{{ client_list | join(',') | regex_replace(' +,' ',') }}",
         server.ssl: 'on',
@@ -128,46 +128,46 @@
   delegate_to: "{{groups['gluster_servers'][0]}}"
 
 # without ssl
-- name: create gluster volumes without ssl
-  gluster.gluster.gluster_volume:
-    state: present
-    name: data-volume
-    bricks: /data
-    replicas: 3
-    cluster:
-      - '{{ gluster1 }}'
-      - '{{ gluster2 }}'
-      - '{{ gluster3 }}'    
-    options:
-      { transport.address-family: inet,
-        nfs.disable: 'on',
-        performance.cache-size: '1GB',
-        cluster.server-quorum-type: 'server',
-        features.cache-invalidation: 'on',
-        performance.stat-prefetch: 'on',
-        performance.io-thread-count: '50',
-        cluster.lookup-optimize: 'on',
-        performance.cache-swift-metadata: 'on',
-        network.inode-lru-limit: '500000',
-        cluster.readdir-optimize: 'on',
-        client.event-threads: '8',
-        server.event-threads: '8',
-        performance.client-io-threads: 'on',
-        performance.quick-read: 'on',
-        performance.read-ahead: 'on',
-        performance.md-cache-timeout: '60',
-        performance.cache-refresh-timeout: '60',
-        auth.allow: "{{ gluster1 }},{{ gluster2 }},{{ gluster3 }},{% set client_list = [] %}\
-          {%- for client in gluster_data1.client %}\
-          {% set _ = client_list.append(client.instance.hostname ~ \"\" ) %}\
-          {%- endfor %}{{ client_list | join(',') | regex_replace(' +,' ',') }}",
-        server.ssl: 'on',
-        client.ssl: 'on'
-      }
-    force: true
-  run_once: true
-  when: enable_tls == 'no'
-  delegate_to: "{{groups['gluster_servers'][0]}}"
+#- name: create gluster volumes without ssl
+#  gluster.gluster.gluster_volume:
+#    state: present
+#    name: data-volume
+#    bricks: /data
+#    replicas: 3
+#    cluster:
+#      - '{{ gluster1 }}'
+#      - '{{ gluster2 }}'
+#      - '{{ gluster3 }}'    
+#    options:
+#      { transport.address-family: inet,
+#        nfs.disable: 'on',
+#        performance.cache-size: '1GB',
+#        cluster.server-quorum-type: 'server',
+#        features.cache-invalidation: 'on',
+#        performance.stat-prefetch: 'on',
+#        performance.io-thread-count: '50',
+#        cluster.lookup-optimize: 'on',
+#        performance.cache-swift-metadata: 'on',
+#        network.inode-lru-limit: '500000',
+#        cluster.readdir-optimize: 'on',
+#        client.event-threads: '8',
+#        server.event-threads: '8',
+#        performance.client-io-threads: 'on',
+#        performance.quick-read: 'on',
+#        performance.read-ahead: 'on',
+#        performance.md-cache-timeout: '60',
+#        performance.cache-refresh-timeout: '60',
+#        auth.allow: "{{ gluster1 }},{{ gluster2 }},{{ gluster3 }},{% set client_list = [] %}\
+#          {%- for client in gluster_data1.client %}\
+#          {% set _ = client_list.append(client.instance.hostname ~ \"\" ) %}\
+#          {%- endfor %}{{ client_list | join(',') | regex_replace(' +,' ',') }}",
+#        server.ssl: 'on',
+#        client.ssl: 'on'
+#      }
+#    force: true
+#  run_once: true
+#  when: enable_tls == 'no'
+#  delegate_to: "{{groups['gluster_servers'][0]}}"
 
 # only when tls is yes
 - name: enable management encryption
@@ -175,7 +175,7 @@
     path: /var/lib/glusterd/secure-access
     state: touch
   notify: restart glusterd
-  when: enable_tls == 'yes'
+  #when: enable_tls == 'yes'
 
 - name: configure quorum ratio
   shell: gluster volume set all cluster.server-quorum-ratio 51%

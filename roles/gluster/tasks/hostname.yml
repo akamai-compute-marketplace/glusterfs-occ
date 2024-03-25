@@ -16,10 +16,6 @@
       {%- for count in range(cluster_size) %}
       {{ gluster_data.server[count].instance.ip_priv1 }} {{ gluster_data.server[count].instance.hostname }}
       {%- endfor %}
-      # client IPs
-      {%- for count in range(client_ips) %}
-      {{ gluster_data.client[count].instance.ip_priv1 }} {{ gluster_data.client[count].instance.hostname }}
-      {%- endfor %}
 
 # can shorthand count and new data strut:
 # https://github.com/linode-solutions/redis-occ-beta/blob/main/roles/redis-sentinel/tasks/hostname.yml
@@ -43,6 +39,9 @@
 - name: configure hostnames
   hostname:
     use: systemd
-    name: "{{ item.instance.hostname }}"
+    name: "{{ gluster_data.server[count].instance.hostname }}"
   run_once: true
-  loop: "{{ gluster_data.server }}"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+  loop_control:
+    index_var: count

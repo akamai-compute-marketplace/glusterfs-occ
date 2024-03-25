@@ -10,8 +10,8 @@
     state: started
     name: data-volume
 
-- name: restart firewalld
-  systemd:
-    name: firewalld
-    state: restarted
-    enabled: yes
+#- name: restart firewalld
+#  systemd:
+#    name: firewalld
+#    state: restarted
+#    enabled: yes

@@ -6,22 +6,24 @@
 
 # configure firewalld
 
-- name: add gluster to internal zone
-  ansible.posix.firewalld:
-    service: "glusterfs"
-    permanent: yes
-    zone: internal
-    state: enabled
+# removing to add ufw instead
 
-- name: adding servers to the internal firewall zone
-  ansible.posix.firewalld:
-    source: "{{ item.instance.ip_priv1 }}"
-    permanent: yes
-    zone: internal
-    state: enabled
-  loop: "{{ gluster_data.server +  gluster_data.client }}"
-  
-- name: restarting firewalld on servers
-  systemd:
-    name: firewalld
-    state: restarted
+#- name: add gluster to internal zone
+#  ansible.posix.firewalld:
+#    service: "glusterfs"
+#    permanent: yes
+#    zone: internal
+#    state: enabled
+#
+#- name: adding servers to the internal firewall zone
+#  ansible.posix.firewalld:
+#    source: "{{ item.instance.ip_priv1 }}"
+#    permanent: yes
+#    zone: internal
+#    state: enabled
+#  loop: "{{ gluster_data.server +  gluster_data.client }}"
+#  
+#- name: restarting firewalld on servers
+#  systemd:
+#    name: firewalld
+#    state: restarted

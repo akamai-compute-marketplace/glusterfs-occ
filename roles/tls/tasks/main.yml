@@ -38,7 +38,7 @@
   community.crypto.openssl_csr:
     path: roles/tls/files/csr/{{ item.instance.hostname }}.csr
     privatekey_path: roles/tls/files/key/{{ item.instance.hostname }}.key
-    common_name: '{{ item }}'
+    common_name: '{{ item.instance.hostname }}'
   loop: "{{ gluster_data.server + gluster_data.client }}"
 
 #- name: generate cert
@@ -66,11 +66,11 @@
     privatekey_path: roles/tls/files/key/{{ item.instance.hostname }}.key
     csr_path: roles/tls/files/csr/{{ item.instance.hostname }}.csr
     provider: selfsigned
-    subject:
-      commonName: '{{ item }}'
-    signature_algorithms:
-      - sha256WithRSAEncryption
-      - sha512WithRSAEncryption
+#    subject:
+#      commonName: '{{ item }}'
+#    signature_algorithms:
+#      - sha256WithRSAEncryption
+#      - sha512WithRSAEncryption
   loop: "{{ gluster_data.server + gluster_data.client }}"
 
 - name: generate ca
