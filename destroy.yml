@@ -1,0 +1,20 @@
+---
+# destroy instances
+
+- name: destroying gluster instances 
+  hosts: localhost
+  connection: local
+  vars_files:
+      - group_vars/gluster/vars
+      - group_vars/gluster/secret_vars
+  
+  vars:
+    count: '{{ cluster_size - 1 }}'
+
+  tasks:
+  - name: deleting instances except provisioner
+    linode.cloud.instance:
+      label: '{{ instance_prefix }}{{ item | int + 1 }}-{{ uuid }}'
+      api_token: '{{ api_token }}'
+      state: absent
+    with_sequence: count='{{ count }}'

@@ -1,5 +1,5 @@
-# create gluster server and client linodes
-- name: create gluster linodes
+# create gluster server and client instances
+- name: create gluster instances
   hosts: localhost
   vars_files:
       - group_vars/gluster/vars
@@ -49,17 +49,17 @@
     register: info
     with_sequence: count='{{ cluster_size }}'
 
-  - name: set facts
-    set_fact:
-      # hostnames
-      gluster{{ count + 1 }}_hostname: 'gluster{{ count + 1}}'
-      # public ips
-      gluster{{ count + 1 }}_pub1: '{{ info.results[count].instance.ipv4[0] }}'
-      # private ips
-      gluster{{ count + 1 }}_priv1: '{{ info.results[count].instance.ipv4[1] }}'
-    loop: "{{ info.results }}"
-    loop_control:
-      index_var: count      
+#  - name: set facts
+#    set_fact:
+#      # hostnames
+#      gluster{{ count + 1 }}_hostname: 'gluster{{ count + 1 }}'
+#      # public ips
+#      gluster{{ count + 1 }}_pub1: '{{ info.results[count].instance.ipv4[0] }}'
+#      # private ips
+#      gluster{{ count + 1 }}_priv1: '{{ info.results[count].instance.ipv4[1] }}'
+#    loop: "{{ info.results }}"
+#    loop_control:
+#      index_var: count      
 
 #  - name: Get info about clients by label
 #    linode.cloud.instance_info:
@@ -83,12 +83,12 @@
 #      client_priv2: '{{ info.results.1.instance.ipv4[1] }}'
 #      client_priv3: '{{ info.results.2.instance.ipv4[1] }}'
   
-  - name: test connectivity
-    ping:
-    loop:
-      - '{{ gluster1_pub1 }}'
-      - '{{ gluster2_pub2 }}'
-      - '{{ gluster3_pub3 }}'
+#  - name: test connectivity
+#    ping:
+#    loop:
+#      - '{{ gluster1_pub1 }}'
+#      - '{{ gluster2_pub1 }}'
+#      - '{{ gluster3_pub1 }}'
 #      - '{{ client_ip1 }}'
 #      - '{{ client_ip2 }}'
 #      - '{{ client_ip3 }}'
@@ -104,25 +104,25 @@
             {%- for count in range(cluster_size) %}
             - gluster{{ count + 1 }}:
               instance:
-                hostname: {{ info.results[count].instance.label | replace('_', '-') }}
+                hostname: gluster{{ count + 1 }}
                 ip_pub1: {{ info.results[count].instance.ipv4[0] }}
                 ip_priv1: {{ info.results[count].instance.ipv4[1] }}
             {%- endfor %}
           client:
             {% set count = namespace(value=0) %}
             {%- for ip in client_ips %}
-            - client{{ count.value + 1 }}
+            - client{{ count.value | int + 1 }}:
               instance:
-                hostname: client{{ count + 1 }}
+                hostname: client{{ count | int + 1 }}
                 ip_pub1: {{ ip }}
-            {%- set count.value = count.value + 1 %}
+            {%- set count.value = count.value | int + 1 %}
             {%- endfor %}
     #loop: "{{ info.results }}"
 
   - name: add gluster nodes to inventory
     blockinfile:
       path: ./hosts
-      marker: "# {mark} GLUSTER LINODES"
+      marker: "# {mark} GLUSTER INSTANCES"
       block: |
         #jinja2: trim_blocks:False
         [gluster_servers]
