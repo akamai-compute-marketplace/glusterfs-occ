@@ -11,12 +11,12 @@
     - precheck
 
 # ssl certs
-- name: generate ssl certs
-  hosts: localhost
-  vars_files:
-    - group_vars/gluster/vars
-  roles:
-    - tls
+#- name: generate ssl certs
+#  hosts: localhost
+#  vars_files:
+#    - group_vars/gluster/vars
+#  roles:
+#    - tls
 
 # gluster servers
 - name: configure gluster servers
