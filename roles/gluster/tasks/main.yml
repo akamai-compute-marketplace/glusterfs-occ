@@ -12,7 +12,7 @@
 
 - name: configure SSL on Gluster
   import_tasks: ssl.yml
-  when: enable_tls == 'yes'
+  #when: enable_tls == 'yes'
 
 - name: configure Gluster service
   import_tasks: configure.yml
