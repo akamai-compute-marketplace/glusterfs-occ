@@ -124,7 +124,7 @@
       }
     force: true
   run_once: true
-  when: enable_tls == 'yes'
+  #when: enable_tls == 'yes'
   delegate_to: "{{groups['gluster_servers'][0]}}"
 
 # without ssl
