@@ -28,6 +28,7 @@
   roles:
     - common
     - gluster
+    - post
 
 ## client servers
 #- name: configure gluster clients
