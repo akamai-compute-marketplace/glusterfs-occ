@@ -128,8 +128,6 @@
   delegate_to: "{{groups['gluster_servers'][0]}}"
   retries: 3
   delay: 3
-  register: peerwait
-  until: peerwait.rc == 0
 
 # without ssl
 #- name: create gluster volumes without ssl
