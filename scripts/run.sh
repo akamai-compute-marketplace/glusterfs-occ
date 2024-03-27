@@ -83,7 +83,6 @@ function ansible:build {
   username: ${USER_NAME}
   uuid: ${UUID}  
   cluster_size: ${CLUSTER_SIZE}
-  enable_tls: ${ENABLE_TLS}
 EOF
   # write client IPs
   IPS=$(echo ${CLIENT_IPS} | tr ' ' '\n' | grep -Eo '^([0-9]{1,3}\.){3}[0-9]{1,3}' | sed 's/^/  - /g')

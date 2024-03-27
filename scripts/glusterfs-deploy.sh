@@ -12,9 +12,7 @@ fi
 # <UDF name="clusterheader" label="Cluster Settings" default="Yes" header="Yes">
 # <UDF name="add_ssh_keys" label="Add Account SSH Keys to All Nodes?" oneof="yes,no"  default="yes" />
 # <UDF name="cluster_size" label="Gluster cluster size" default="3" oneof="3" />
-# <UDF name="enable_tls" label="Enable TLS security?" oneof="yes,no"  default="yes" />
 # <UDF name="client_ips" label="List of IP addresses to whitelist" example="192.168.1.2, 8.8.8.8"/>
-
 
 # git repo
 git_username="akamai-compute-marketplace"

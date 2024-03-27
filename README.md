@@ -126,6 +126,11 @@ testfile
 root@gluster3:~# ls /data
 testfile
 ```
-## Author
-
-- Billy Thompson (@rylabs-billy)
+```
+ mkdir /var/lib/glusterd
+touch /var/lib/glusterd/secure-access
+```
+move client certs, then mount:
+```
+mount -t glusterfs 192.168.139.160:/data-volume /mnt
+```

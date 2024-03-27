@@ -45,3 +45,6 @@
     - { regexp: '^\#?PasswordAuthentication (yes|no)', line: 'PasswordAuthentication no' }
     - { regexp: '^\#?PubkeyAuthentication (yes|no)', line: 'PubkeyAuthentication yes' }
   notify: restart ssh
+
+- name: apply ufw rules
+  import_tasks: ufw_rules.yml
