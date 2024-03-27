@@ -22,6 +22,8 @@
 - name: configure gluster servers
   hosts: gluster_servers
   user: root
+  vars:
+    local_home: "{{ lookup('env','HOME') }}"  
   vars_files:
     - group_vars/gluster/vars
     - group_vars/gluster/secret_vars
