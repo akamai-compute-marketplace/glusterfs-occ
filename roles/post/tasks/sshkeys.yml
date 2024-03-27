@@ -5,8 +5,7 @@
   slurp:
     src: "/etc/shadow"
   run_once: true
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['jitsi_servers'] }}"
+  delegate_to: "localhost"
   register: shadow
 
 - name: set root password
