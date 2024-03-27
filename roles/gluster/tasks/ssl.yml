@@ -8,6 +8,23 @@
 - name: generate dhparams.pem with the default size (4096 bits)
   community.crypto.openssl_dhparam:
     path: "{{ ssl_directory }}/dhparams.pem"
+  run_once: true
+  delegate_to: "localhost"
+
+- name: copy dhparams.pem
+  slurp:
+    src: "{{ ssl_directory }}/dhparams.pem"
+  register: dhparampem
+  delegate_to: "localhost"
+
+- name: move dhparam.pem to gluster nodes
+  copy:
+    dest: "{{ ssl_directory }}/dhparams.pem"
+    content: |
+      {{ dhparampem['content'] | b64decode }}
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
 
 - name: generate private key for gluster
   community.crypto.openssl_privatekey:
