@@ -23,8 +23,12 @@
   community.crypto.openssl_csr:
     path: "{{ ssl_directory }}/glusterfs.csr"
     privatekey_path: "{{ ssl_directory }}/glusterfs.key"
-    common_name: '{{ item.instance.hostname }}'
-  loop: "{{ gluster_data.server }}"
+    common_name: '{{ gluster_data.server[count].instance.hostname }}'
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+  loop_control:
+    index_var: count
 
 - name: generate csr for clients
   community.crypto.openssl_csr:
