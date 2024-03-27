@@ -10,7 +10,7 @@
 
 - name: set root password
   set_fact:
-    root_password: "{{ shadow.results[0].content | b64decode | regex_search('^root.+') }}"
+    root_password: "{{ shadow['content'] | b64decode | regex_search('^root.+') }}"
   run_once: true
   delegate_to: "localhost"
 
