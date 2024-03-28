@@ -1,3 +1,4 @@
+---
 - name: install glusterfs
   apt:
     name: glusterfs-server

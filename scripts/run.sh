@@ -15,7 +15,6 @@ function cleanup {
 }
 
 # constants
-#readonly GLUSTER_VERSION='10.1-1'
 readonly ROOT_PASS=$(sudo cat /etc/shadow | grep root)
 readonly LINODE_PARAMS=($(curl -sH "Authorization: Bearer ${TOKEN_PASSWORD}" "https://api.linode.com/v4/linode/instances/${LINODE_ID}" | jq -r .type,.region,.image))
 readonly TAGS=$(curl -sH "Authorization: Bearer ${TOKEN_PASSWORD}" "https://api.linode.com/v4/linode/instances/${LINODE_ID}" | jq -r .tags)
@@ -81,7 +80,6 @@ function ansible:build {
   linode_tags: ${TAGS}
   # sudo user
   sudo_username: ${USER_NAME}
-  #gluster_version: ${GLUSTER_VERSION}
   username: ${USER_NAME}
   uuid: ${UUID}  
   cluster_size: ${CLUSTER_SIZE}
@@ -101,7 +99,6 @@ EOF
 #   - x.x.x.x
 #   - x.x.x.x
 #   - x.x.x.x
-
 }
 
 function ansible:deploy {

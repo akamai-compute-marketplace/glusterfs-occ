@@ -15,6 +15,6 @@
   - name: deleting instances except provisioner
     linode.cloud.instance:
       label: '{{ instance_prefix }}{{ item | int + 1 }}-{{ uuid }}'
-      api_token: '{{ api_token }}'
+      api_token: '{{ token }}'
       state: absent
     with_sequence: count='{{ count }}'

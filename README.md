@@ -1,5 +1,5 @@
 # GlusterFS Cluster with Ansible 
-![glusterfs-diagram.png](glusterfs-diagram.png)
+<img src="glusterfs-diagram.png" alt="drawing" width="300"/>
 
 Deploy a highly available, replicated filesystem using the [Linode Ansible Collection](https://github.com/linode/ansible_linode) and [GlusterFS](https://www.gluster.org/). This playbook is intended to stand up a fresh deployment of three Gluster servers and three clients, including the provisioning of Linode instances, with the following configuration:
 
@@ -34,10 +34,12 @@ Deploy a highly available, replicated filesystem using the [Linode Ansible Colle
 
 This should _not_ be used for updating an existing deployment. Additional playbooks can be run against the clients to install and configure applications that read/write to the Gluster volume, and against the servers for adding bricks, updating TLS certificates, performance tuning and so on.
 
-## Distributions
+## Supported Distribution
 
-- Ubuntu 20.04
-- Debian 10 
+- Ubuntu 22.04 
+
+## GlusterFS Version
+- 10.1
 
 ## Installation
 Create a virtual environment to isolate dependencies from other packages on your system.
@@ -49,7 +51,7 @@ source env/bin/activate
 Install Ansible collections and required Python packages.
 ```
 pip install -r requirements.txt
-ansible-galaxy collection install linode.cloud gluster.gluster community.crypto
+ansible-galaxy install -r collections.yml
 ```
 
 ## Setup
@@ -83,12 +85,10 @@ Configure the Linode instance [parameters](https://github.com/linode/ansible_lin
 ```
 ssh_keys: ssh-rsa AAAA_valid_public_ssh_key_123456785== user@their-computer
 server_prefix: gluster
-client_prefix: client
 cluster_name: POC
 type: g6-standard-4
 region: ap-south
-image: linode/debian10
-group: glusterfs
+image: linode/ubuntu22.04
 linode_tags: POC
 ```
 
@@ -103,34 +103,71 @@ Now run the `site.yml` playbook with the `hosts` inventory file. A pre-check tak
 ansible-playbook -i hosts site.yml
 ```
 
-## Testing Replication
-The client nodes mount the Gluster volume on `/srv/www`. Create a test file on one and make sure it replicates to the others.
+## Configure Clients With SSL Certificates
+
+Before you can mount Gluster onto the client nodes, you will need to configure them so that they can present their certificate to the server. First, install the Gluster client packages that will allow you use glusterfs as a mount type:
+
 ```
-root@client1:~# touch /srv/www/testfile
-
-root@client2:~# ls /srv/www/
-testfile
-
-root@client3:~# ls /srv/www/
-testfile
+apt install glusterfs-client -y
 ```
 
-You should also see it in the `/data` bricks directory on all server nodes.
-```
-root@gluster1:~# ls /data
-testfile
+Next, create the glusterd directory so that we can enable SSL connections.
 
-root@gluster2:~# ls /data
-testfile
-
-root@gluster3:~# ls /data
-testfile
 ```
-```
- mkdir /var/lib/glusterd
+mkdir /var/lib/glusterd
 touch /var/lib/glusterd/secure-access
 ```
-move client certs, then mount:
+
+Go ahead and grab the SSL certificates for client1 that was created by the playbook on the first Gluster node; This is the provisioner node. For example, on the first Gluster node you will see the following in `/usr/lib/ssl`:
+
 ```
-mount -t glusterfs 192.168.139.160:/data-volume /mnt
+(env) root@gluster1:/usr/lib/ssl# ls -l
+total 68
+lrwxrwxrwx 1 root root    14 Mar 16  2022 certs -> /etc/ssl/certs
+-rw-r--r-- 1 root root  1630 Mar 28 14:40 client1.csr
+-rw------- 1 root root  3243 Mar 28 14:40 client1.key
+-rw-r--r-- 1 root root  1761 Mar 28 14:40 client1.pem
+-rw-r--r-- 1 root root  1630 Mar 28 14:40 client2.csr
+-rw------- 1 root root  3243 Mar 28 14:40 client2.key
+-rw-r--r-- 1 root root  1761 Mar 28 14:40 client2.pem
+-rw-r--r-- 1 root root  1630 Mar 28 14:40 client3.csr
+-rw------- 1 root root  3243 Mar 28 14:40 client3.key
+-rw-r--r-- 1 root root  1761 Mar 28 14:40 client3.pem
+-rw-r--r-- 1 root root   769 Mar 28 14:40 dhparams.pem
+-rw-r--r-- 1 root root 10584 Mar 28 14:40 glusterfs.ca
+-rw-r--r-- 1 root root  1635 Mar 28 14:40 glusterfs.csr
+-rw------- 1 root root  3243 Mar 28 14:40 glusterfs.key
+-rw-r--r-- 1 root root  1765 Mar 28 14:40 glusterfs.pem
+drwxr-xr-x 2 root root  4096 Mar 28 14:16 misc
+lrwxrwxrwx 1 root root    20 Feb 16 08:51 openssl.cnf -> /etc/ssl/openssl.cnf
+lrwxrwxrwx 1 root root    16 Mar 16  2022 private -> /etc/ssl/private
+
 ```
+
+You will need to copy the `client1.pem`, `client1.key` and the `glusterfs.ca` and put them on the node for client1 in the `/usr/lib/ssl` directory.
+
+**NOTE**: You will need to rename `client1.pem`, `client1.key` as `glusterfs.pem` and `glusterfs.key` on the client node to ensure that the Gluster client is able to read the certficate files.
+
+Finally, go ahead and mount Gluster on the client node:
+
+```
+mount -t glusterfs gluster1:/data-volume /mnt
+```
+
+Make sure that `gluster1` is in your `/etc/hosts` file or that you using the private IP address of the Gluster node.
+
+If you want to mount Gluster on boot, you can update `/etc/fstab` with the following:
+
+```
+gluster1:/data-volume  /mymount  glusterfs defaults,_netdev,backup-volfile-servers=gluster2:gluster3 0 0
+```
+
+Make sure that `/etc/hosts` is also updated for host resolution. For example:
+
+```
+192.168.139.160 gluster1
+192.168.201.13 gluster2
+192.168.230.83 gluster3
+```
+
+You can repeat this process for the remainder of the client nodes.
