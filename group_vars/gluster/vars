@@ -1,6 +1,5 @@
 ssh_keys:
-instance_prefix: 
-#client_prefix:
+instance_prefix:
 cluster_size:
 cluster_name:
 type: 

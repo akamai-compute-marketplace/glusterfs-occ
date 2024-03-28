@@ -1,3 +1,4 @@
+---
 # roles/precheck/tasks
 
 - name: stat glusterd.vol

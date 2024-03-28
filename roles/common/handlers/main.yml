@@ -1,5 +1,5 @@
+---
 # roles/common/handlers
-
 - name: start fail2ban
   systemd:
     name: fail2ban

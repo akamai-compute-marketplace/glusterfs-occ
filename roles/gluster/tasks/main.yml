@@ -4,15 +4,11 @@
 - name: configure hostname
   import_tasks: hostname.yml
 
-#- name: install firewall
-#  import_tasks: firewall.yml
-
 - name: install gluster
   import_tasks: install.yml
 
 - name: configure SSL on Gluster
   import_tasks: ssl.yml
-  #when: enable_tls == 'yes'
 
-- name: configure Gluster service
+- name: configure gluster service
   import_tasks: configure.yml

@@ -1,3 +1,4 @@
+---
 # linode gluster ansible playbook
 
 # cluster pre-check
@@ -9,14 +10,6 @@
     - group_vars/gluster/secret_vars
   roles:
     - precheck
-
-# ssl certs
-#- name: generate ssl certs
-#  hosts: localhost
-#  vars_files:
-#    - group_vars/gluster/vars
-#  roles:
-#    - tls
 
 # gluster servers
 - name: configure gluster servers
@@ -31,14 +24,3 @@
     - common
     - gluster
     - post
-
-## client servers
-#- name: configure gluster clients
-#  hosts: client_servers
-#  user: root
-#  vars_files:
-#    - group_vars/gluster/vars
-#    - group_vars/gluster/secret_vars
-#  roles:
-#    - common
-#    - client

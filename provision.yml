@@ -1,3 +1,4 @@
+---
 # create gluster server and client instances
 - name: create gluster instances
   hosts: localhost
@@ -6,7 +7,6 @@
       - group_vars/gluster/secret_vars
   
   vars:
-    #count: 3 #UDF
     count: '{{ cluster_size - 1 }}'
 
   tasks:
@@ -26,72 +26,12 @@
       state: present
     with_sequence: count='{{ count }}'
 
-#  - name: creating gluster clients
-#    linode.cloud.instance:
-#      label: '{{ client_prefix }}{{ item }}'
-#      api_token: '{{ token }}'
-#      type: '{{ type }}'
-#      region: '{{ region }}'
-#      image: '{{ image }}'
-#      root_pass: '{{ root_pass }}'
-#      authorized_keys: '{{ ssh_keys }}'
-#      private_ip: true
-#      group: '{{ group }}'
-#      tags: '{{ linode_tags }}'
-#      state: present
-#    register: linode
-#    with_sequence: count='{{ count }}'
-
   - name: get info about the instances
     linode.cloud.instance_info:
       api_token: '{{ token }}'
       label: '{{ instance_prefix }}{{ item }}-{{ uuid }}'
     register: info
     with_sequence: count='{{ cluster_size }}'
-
-#  - name: set facts
-#    set_fact:
-#      # hostnames
-#      gluster{{ count + 1 }}_hostname: 'gluster{{ count + 1 }}'
-#      # public ips
-#      gluster{{ count + 1 }}_pub1: '{{ info.results[count].instance.ipv4[0] }}'
-#      # private ips
-#      gluster{{ count + 1 }}_priv1: '{{ info.results[count].instance.ipv4[1] }}'
-#    loop: "{{ info.results }}"
-#    loop_control:
-#      index_var: count      
-
-#  - name: Get info about clients by label
-#    linode.cloud.instance_info:
-#      api_token: '{{ token }}'
-#      label: '{{ client_prefix }}{{ item }}'
-#    register: info
-#    with_sequence: count='{{count}}'
-#
-#  - name: set facts
-#    set_fact:
-#      # hostnames
-#      client1: '{{ info.results.0.instance.label }}'
-#      client2: '{{ info.results.1.instance.label }}'
-#      client3: '{{ info.results.2.instance.label }}'
-#      # public ips
-#      client_ip1: '{{ info.results.0.instance.ipv4[0] }}'
-#      client_ip2: '{{ info.results.1.instance.ipv4[0] }}'
-#      client_ip3: '{{ info.results.2.instance.ipv4[0] }}'
-#      # private ips
-#      client_priv1: '{{ info.results.0.instance.ipv4[1] }}'
-#      client_priv2: '{{ info.results.1.instance.ipv4[1] }}'
-#      client_priv3: '{{ info.results.2.instance.ipv4[1] }}'
-  
-#  - name: test connectivity
-#    ping:
-#    loop:
-#      - '{{ gluster1_pub1 }}'
-#      - '{{ gluster2_pub1 }}'
-#      - '{{ gluster3_pub1 }}'
-#      - '{{ client_ip1 }}'
-#      - '{{ client_ip2 }}'
-#      - '{{ client_ip3 }}'
 
   - name: update group_vars
     blockinfile:
@@ -117,7 +57,6 @@
                 ip_pub1: {{ ip }}
             {%- set count.value = count.value + 1 %}
             {%- endfor %}
-    #loop: "{{ info.results }}"
 
   - name: add gluster nodes to inventory
     blockinfile:
@@ -129,35 +68,7 @@
         localhost ansible_connection=local user=root
         {%- for count in range(cluster_size - 1) %}
         {{ info.results[count + 1].instance.ipv4[0] }}
-        {%- endfor %}        
-
-#  - name: add client nodes to inventory
-#    blockinfile:
-#      path: ./hosts
-#      marker: "# {mark} CLIENT LINODES"
-#      block: |
-#        [client_servers]
-#        {{ client_ip1 }}
-#        {{ client_ip2 }}
-#        {{ client_ip3 }}
-  
-#  - name: add gluster nodes to in-memory inventory
-#    add_host:
-#      name: '{{ item }}'
-#      groups: gluster_servers
-#    loop:
-#      - '{{ gluster_ip1 }}'
-#      - '{{ gluster_ip2 }}'
-#      - '{{ gluster_ip3 }}'
-#
-#  - name: add client nodes to in-memory inventory
-#    add_host:
-#      name: '{{ item }}'
-#      groups: client_servers
-#    loop:
-#      - '{{ client_ip1 }}'
-#      - '{{ client_ip2 }}'
-#      - '{{ client_ip3 }}'
+        {%- endfor %}
 
   - name: wait for port 22 to become open
     wait_for:

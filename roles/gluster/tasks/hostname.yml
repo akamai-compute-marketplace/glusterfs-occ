@@ -1,12 +1,4 @@
-#- name: update /etc/hosts
-#  blockinfile:
-#    path: /etc/hosts
-#    marker: "# {mark} GLUSTERFS HOSTS"
-#    block: |
-#      {{ gluster_priv_ip1 }} {{ gluster1 }}
-#      {{ gluster_priv_ip2 }} {{ gluster2 }}
-#      {{ gluster_priv_ip3 }} {{ gluster3 }}
-
+---
 - name: update /etc/hosts
   blockinfile:
     path: /etc/hosts
@@ -16,25 +8,6 @@
       {%- for count in range(cluster_size) %}
       {{ gluster_data.server[count].instance.ip_priv1 }} {{ gluster_data.server[count].instance.hostname }}
       {%- endfor %}
-
-# can shorthand count and new data strut:
-# https://github.com/linode-solutions/redis-occ-beta/blob/main/roles/redis-sentinel/tasks/hostname.yml
-
-
-#- name: set gluster1 hostname
-#  shell: hostnamectl set-hostname '{{ gluster1 }}'
-#  run_once: true
-#  delegate_to: "{{groups['gluster_servers'][0]}}"
-
-#- name: set gluster2 hostname
-#  shell: hostnamectl set-hostname '{{ gluster2 }}'
-#  run_once: true
-#  delegate_to: "{{groups['gluster_servers'][1]}}"
-
-#- name: set gluster3 hostname
-#  shell: hostnamectl set-hostname '{{ gluster3 }}'
-#  run_once: true
-#  delegate_to: "{{groups['gluster_servers'][2]}}"
 
 - name: configure hostnames
   hostname:
