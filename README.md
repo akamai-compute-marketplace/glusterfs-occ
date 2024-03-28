@@ -1,4 +1,4 @@
-# GlusterFS Cluster with Ansible 
+# GlusterFS One-Click Cluster
 <img src="glusterfs-diagram.png" alt="drawing" width="300"/>
 
 Deploy a highly available, replicated filesystem using the [Linode Ansible Collection](https://github.com/linode/ansible_linode) and [GlusterFS](https://www.gluster.org/). This playbook is intended to stand up a fresh deployment of three Gluster servers and three clients, including the provisioning of Linode instances, with the following configuration:
