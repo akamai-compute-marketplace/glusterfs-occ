@@ -21,6 +21,7 @@
     proto: tcp
     from_ip: "{{ item.instance.ip_pub1 }}"
   loop: "{{ gluster_data.client }}"
+  when: client_ips is defined
 
 - name: Allow gluster private access to tcp port 54207
   community.general.ufw:
@@ -37,6 +38,7 @@
     proto: tcp
     from_ip: "{{ item.instance.ip_pub1 }}"
   loop: "{{ gluster_data.client }}"
+  when: client_ips is defined
 
 
 # async to avoid connection disruption

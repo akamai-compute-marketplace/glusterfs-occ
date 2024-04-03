@@ -81,7 +81,7 @@ token: !vault |
           6365653234666565353634653030316638326662316165386637
 ```
 
-Configure the Linode instance [parameters](https://github.com/linode/ansible_linode/blob/master/docs/instance.rst#id3), `server` and `client` prefixes, and `cluster_name` variables in `group_vars/gluster/vars`. As with the above, replace the example values with your own. This playbook was written to support `linode/debian10` and `linode/ubuntu20.04` images.
+Configure the Linode instance [parameters](https://github.com/linode/ansible_linode/blob/master/docs/instance.rst#id3), `server` and `client` prefixes, and `cluster_name` variables in `group_vars/gluster/vars`. As with the above, replace the example values with your own. This playbook was written to support `linode/ubuntu22.04` image.
 ```
 ssh_keys: ssh-rsa AAAA_valid_public_ssh_key_123456785== user@their-computer
 server_prefix: gluster

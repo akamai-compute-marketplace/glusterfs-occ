@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-DEBUG="YES"
+DEBUG="NO"
 if [ "${DEBUG}" == "NO" ]; then
   trap "cleanup $? $LINENO" EXIT
 fi
@@ -87,13 +87,15 @@ EOF
   # write client IPs
   IPS=$(echo ${CLIENT_IPS} | tr ' ' '\n' | grep -Eo '^([0-9]{1,3}\.){3}[0-9]{1,3}' | sed 's/^/  - /g')
   if [ -z ${IPS} ]; then
-    echo "[ERROR] No valid IP addressed found"
-    exit 1
-  fi
-  cat << EOF >> ${VARS_PATH}
+    echo "[INFO] No valid client IP addressed found"
+    #exit 1
+  else
+    cat << EOF >> ${VARS_PATH}
 client_ips:
 ${IPS}
 EOF
+  fi
+
 # output:
 # client_ips:
 #   - x.x.x.x
