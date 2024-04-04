@@ -116,6 +116,7 @@
   delay: 3
   register: result
   until: result is not failed
+  when: client_ips is not defined
 
 - name: enable management encryption
   file:
