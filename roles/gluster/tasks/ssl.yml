@@ -1,0 +1,125 @@
+---
+# generate tls certificates for gluster and client nodes
+
+- name: set ssl directory
+  set_fact:
+    ssl_directory: "/usr/lib/ssl"
+
+- name: generate dhparams.pem with the default size (4096 bits)
+  community.crypto.openssl_dhparam:
+    path: "{{ ssl_directory }}/dhparams.pem"
+  run_once: true
+  delegate_to: "localhost"
+
+- name: copy dhparams.pem
+  slurp:
+    src: "{{ ssl_directory }}/dhparams.pem"
+  register: dhparampem
+  delegate_to: "localhost"
+
+- name: move dhparam.pem to gluster nodes
+  copy:
+    dest: "{{ ssl_directory }}/dhparams.pem"
+    content: |
+      {{ dhparampem['content'] | b64decode }}
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+
+- name: generate private key for gluster
+  community.crypto.openssl_privatekey:
+   path: "{{ ssl_directory }}/glusterfs.key"
+
+- name: generate private key for clients
+  community.crypto.openssl_privatekey:
+   path: "{{ ssl_directory }}/{{ item.instance.hostname }}.key"
+  loop: "{{ gluster_data.client }}"
+  delegate_to: "localhost"
+  when: client_ips is defined
+
+- name: generate csr for gluster
+  community.crypto.openssl_csr:
+    path: "{{ ssl_directory }}/glusterfs.csr"
+    privatekey_path: "{{ ssl_directory }}/glusterfs.key"
+    common_name: '{{ gluster_data.server[count].instance.hostname }}'
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+  loop_control:
+    index_var: count
+
+- name: generate csr for clients
+  community.crypto.openssl_csr:
+    path: "{{ ssl_directory }}/{{ item.instance.hostname }}.csr"
+    privatekey_path: "{{ ssl_directory }}/{{ item.instance.hostname }}.key"
+    common_name: '{{ item.instance.hostname }}'
+  loop: "{{ gluster_data.client }}"
+  delegate_to: "localhost"
+  when: client_ips is defined
+ 
+- name: generate cert for gluster
+  community.crypto.x509_certificate:
+    path: "{{ ssl_directory }}/glusterfs.pem"
+    privatekey_path: "{{ ssl_directory }}/glusterfs.key"
+    csr_path: "{{ ssl_directory }}/glusterfs.csr"
+    provider: selfsigned
+ 
+- name: generate cert for clients
+  community.crypto.x509_certificate:
+    path: "{{ ssl_directory }}/{{ item.instance.hostname }}.pem"
+    privatekey_path: "{{ ssl_directory }}/{{ item.instance.hostname }}.key"
+    csr_path: "{{ ssl_directory }}/{{ item.instance.hostname }}.csr"
+    provider: selfsigned
+  loop: "{{ gluster_data.client }}"
+  delegate_to: "localhost"
+  when: client_ips is defined
+
+- name: get gluster certs for ca
+  slurp:
+    src: "{{ ssl_directory }}/glusterfs.pem"
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+  register: glustercerts
+
+- name: get client certs for ca
+  slurp:
+    src: "{{ ssl_directory }}/{{ item.instance.hostname }}.pem"
+  run_once: true
+  delegate_to: "localhost"
+  loop: "{{ gluster_data.client }}"
+  register: clientcerts
+  when: client_ips is defined
+
+- name: setting client cert facts
+  set_fact:
+    "client{{ count + 1 }}_cert": "{{ item.content | b64decode }}"
+  loop: "{{ clientcerts.results }}"
+  loop_control:
+    index_var: count
+  run_once: true
+  delegate_to: localhost
+  when: client_ips is defined
+
+- name: write gluster certs to ca
+  lineinfile:
+    path: '{{ ssl_directory }}/glusterfs.ca'
+    insertafter: EOF
+    create: yes
+    line: |
+      {{ item.content | b64decode }}
+  loop: "{{ glustercerts.results }}"
+  loop_control:
+    index_var: count
+        
+- name: write client certs to ca
+  lineinfile:
+    path: '{{ ssl_directory }}/glusterfs.ca'
+    insertafter: EOF
+    create: yes
+    line: |
+      {{ item.content | b64decode }}
+  loop: "{{ clientcerts.results }}"
+  loop_control:
+    index_var: count
+  when: client_ips is defined 

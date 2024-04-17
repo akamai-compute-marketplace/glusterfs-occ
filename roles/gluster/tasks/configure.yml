@@ -1,0 +1,133 @@
+---
+# set facts for reference
+
+- name: setting facts
+  set_fact:
+    gluster1: "{{ gluster_data.server[0].instance.hostname }}"
+    gluster2: "{{ gluster_data.server[1].instance.hostname }}"
+    gluster3: "{{ gluster_data.server[2].instance.hostname }}"
+
+- name: glusterd start
+  systemd:
+    name: glusterd
+    state: started
+    enabled: yes
+
+- name: ensure glusterd is in running state
+  systemd:
+    name: glusterd 
+    state: started
+  register: result
+  until: result.status.ActiveState == "active"
+  retries: 10
+  delay: 5
+
+- name: create trusted storage pool
+  gluster.gluster.gluster_peer:
+    state: present
+    nodes:
+      - '{{ gluster_data.server[1].instance.hostname }}'
+      - '{{ gluster_data.server[2].instance.hostname }}'
+  run_once: true
+  delegate_to: "localhost"  
+
+- name: create gluster volumes with ssl
+  gluster.gluster.gluster_volume:
+    state: present
+    name: data-volume
+    bricks: /data
+    replicas: 3
+    cluster:
+      - '{{ gluster1 }}'
+      - '{{ gluster2 }}'
+      - '{{ gluster3 }}'    
+    options:
+      { transport.address-family: inet,
+        nfs.disable: 'on',
+        performance.cache-size: '1GB',
+        cluster.server-quorum-type: 'server',
+        features.cache-invalidation: 'on',
+        performance.stat-prefetch: 'on',
+        performance.io-thread-count: '50',
+        cluster.lookup-optimize: 'on',
+        performance.cache-swift-metadata: 'on',
+        network.inode-lru-limit: '500000',
+        cluster.readdir-optimize: 'on',
+        client.event-threads: '8',
+        server.event-threads: '8',
+        performance.client-io-threads: 'on',
+        performance.quick-read: 'on',
+        performance.read-ahead: 'on',
+        performance.md-cache-timeout: '60',
+        performance.cache-refresh-timeout: '60',
+        auth.ssl-allow: "{{ gluster1 }},{{ gluster2 }},{{ gluster3 }},{% set client_list = [] %}\
+          {%- for client in gluster_data.client %}\
+          {% set _ = client_list.append(client.instance.hostname ~ \"\" ) %}\
+          {%- endfor %}{{ client_list | join(',') | regex_replace(' +,' ',') }}",
+        server.ssl: 'on',
+        client.ssl: 'on'
+      }
+    force: true
+  run_once: true
+  delegate_to: "{{groups['gluster_servers'][0]}}"
+  retries: 3
+  delay: 3
+  register: result
+  until: result is not failed
+  when: client_ips is defined  
+
+- name: create gluster volumes with ssl no clients
+  gluster.gluster.gluster_volume:
+    state: present
+    name: data-volume
+    bricks: /data
+    replicas: 3
+    cluster:
+      - '{{ gluster1 }}'
+      - '{{ gluster2 }}'
+      - '{{ gluster3 }}'    
+    options:
+      { transport.address-family: inet,
+        nfs.disable: 'on',
+        performance.cache-size: '1GB',
+        cluster.server-quorum-type: 'server',
+        features.cache-invalidation: 'on',
+        performance.stat-prefetch: 'on',
+        performance.io-thread-count: '50',
+        cluster.lookup-optimize: 'on',
+        performance.cache-swift-metadata: 'on',
+        network.inode-lru-limit: '500000',
+        cluster.readdir-optimize: 'on',
+        client.event-threads: '8',
+        server.event-threads: '8',
+        performance.client-io-threads: 'on',
+        performance.quick-read: 'on',
+        performance.read-ahead: 'on',
+        performance.md-cache-timeout: '60',
+        performance.cache-refresh-timeout: '60',
+        auth.ssl-allow: "{{ gluster1 }},{{ gluster2 }},{{ gluster3 }}",
+        server.ssl: 'on',
+        client.ssl: 'on'
+      }
+    force: true
+  run_once: true
+  delegate_to: "{{groups['gluster_servers'][0]}}"
+  retries: 3
+  delay: 3
+  register: result
+  until: result is not failed
+  when: client_ips is not defined
+
+- name: enable management encryption
+  file:
+    path: /var/lib/glusterd/secure-access
+    state: touch
+  notify: restart glusterd
+
+- name: configure quorum ratio
+  shell: gluster volume set all cluster.server-quorum-ratio 51%
+  retries: 3
+  delay: 1
+  register: result
+  until: result.rc == 0
+  notify: start gluster volume

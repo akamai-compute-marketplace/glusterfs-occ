@@ -1,0 +1,14 @@
+---
+# roles/gluster/tasks/main.yml
+
+- name: configure hostname
+  import_tasks: hostname.yml
+
+- name: install gluster
+  import_tasks: install.yml
+
+- name: configure SSL on Gluster
+  import_tasks: ssl.yml
+
+- name: configure gluster service
+  import_tasks: configure.yml

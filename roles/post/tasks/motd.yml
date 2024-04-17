@@ -1,0 +1,16 @@
+---
+# motd and creds gen
+- name: copy MOTD template to /etc/motd
+  template:
+    src: templates/motd.j2
+    dest: /etc/motd
+
+- name: writing gluster creds into file
+  copy:
+    dest: "/home/{{ username }}/.credentials"
+    mode: '0600'
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    content: |
+      sudo username: {{ username }}
+      sudo password: {{ password }}

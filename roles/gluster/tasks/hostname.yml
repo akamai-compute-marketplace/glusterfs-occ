@@ -1,0 +1,20 @@
+---
+- name: update /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} GLUSTERFS HOSTS"
+    block: |
+      #jinja2: trim_blocks:False
+      {%- for count in range(cluster_size) %}
+      {{ gluster_data.server[count].instance.ip_priv1 }} {{ gluster_data.server[count].instance.hostname }}
+      {%- endfor %}
+
+- name: configure hostnames
+  hostname:
+    use: systemd
+    name: "{{ gluster_data.server[count].instance.hostname }}"
+  run_once: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['gluster_servers'] }}"
+  loop_control:
+    index_var: count
