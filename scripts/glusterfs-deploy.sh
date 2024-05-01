@@ -76,6 +76,7 @@ function rename_provisioner {
 }
 function setup {
   # install dependencies
+  export DEBIAN_FRONTEND=noninteractive
   apt-get update && apt-get upgrade -y
   apt-get install -y jq git python3 python3-pip python3-dev build-essential
   # add private IP address
